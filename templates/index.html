@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>タスク管理</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>タスク管理</h1>
+      <button id="btn-settings" class="icon-btn" title="設定">&#9881;</button>
+    </header>
+
+    <!-- Settings panel -->
+    <div id="settings-panel" class="panel hidden">
+      <h2>設定</h2>
+      <label>タスクフォルダのパス
+        <input type="text" id="input-dir" placeholder="tasks/" />
+      </label>
+      <div class="btn-row">
+        <button id="btn-save-settings" class="btn primary">保存</button>
+        <button id="btn-cancel-settings" class="btn">キャンセル</button>
+      </div>
+    </div>
+
+    <!-- Add task -->
+    <form id="form-add" class="add-form">
+      <input type="text" id="input-title" placeholder="新しいタスクを入力..." autocomplete="off" />
+      <button type="submit" class="btn primary">追加</button>
+    </form>
+
+    <!-- Filter tabs -->
+    <div class="tabs">
+      <button class="tab active" data-filter="all">すべて</button>
+      <button class="tab" data-filter="todo">未完了</button>
+      <button class="tab" data-filter="done">完了</button>
+    </div>
+
+    <!-- Task list -->
+    <ul id="task-list"></ul>
+
+    <p id="empty-msg" class="empty hidden">タスクがありません</p>
+  </div>
+
+  <template id="tpl-task">
+    <li class="task-item">
+      <label class="checkbox-wrap">
+        <input type="checkbox" class="task-check" />
+        <span class="checkmark"></span>
+      </label>
+      <span class="task-title"></span>
+      <button class="delete-btn icon-btn" title="削除">&#x1F5D1;</button>
+    </li>
+  </template>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
