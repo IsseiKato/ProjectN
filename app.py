@@ -1,13 +1,45 @@
 import os
 import re
+import sys
+import socket
+import threading
+import webbrowser
 from pathlib import Path
 from datetime import datetime
 
 from flask import Flask, jsonify, request, render_template
 
-app = Flask(__name__)
 
-CONFIG = {"tasks_dir": str(Path(__file__).parent / "tasks")}
+def _resource_dir() -> Path:
+    """templates/static の場所。PyInstaller frozen 時は展開先の一時ディレクトリを使う。"""
+    if getattr(sys, "frozen", False):
+        return Path(sys._MEIPASS)
+    return Path(__file__).parent
+
+
+def _app_dir() -> Path:
+    """タスクフォルダのデフォルト親ディレクトリ。実行ファイルと同じ場所を使う。"""
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).parent
+    return Path(__file__).parent
+
+
+def _find_free_port(start: int = 5000) -> int:
+    for port in range(start, start + 100):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            if s.connect_ex(("127.0.0.1", port)) != 0:
+                return port
+    return start
+
+
+_resource = _resource_dir()
+app = Flask(
+    __name__,
+    template_folder=str(_resource / "templates"),
+    static_folder=str(_resource / "static"),
+)
+
+CONFIG = {"tasks_dir": str(_app_dir() / "tasks")}
 
 FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n?", re.DOTALL)
 
@@ -123,4 +155,13 @@ def update_settings():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    is_frozen = getattr(sys, "frozen", False)
+    port = _find_free_port(5000)
+    url = f"http://localhost:{port}"
+
+    if is_frozen:
+        threading.Timer(1.0, lambda: webbrowser.open(url)).start()
+        print(f"起動中: {url}")
+        app.run(debug=False, port=port)
+    else:
+        app.run(debug=True, port=port)
